@@ -23,6 +23,8 @@ var SELECTED_FILE = ""
 
 var apiKey = ""
 var email = ""
+var server = ""
+var character = ""
 
 const u = new uploader()
 
@@ -63,7 +65,11 @@ if(uploadButton) {
         if(UPLOAD_DIR.trim() !== "" && SELECTED_FILE.trim() !== "") {
             u.init({
                 batchSize: 40,
-                filePath: UPLOAD_DIR + SELECTED_FILE
+                filePath: UPLOAD_DIR + SELECTED_FILE,
+                serverName: server,
+                characterName: character,
+                apiKey: apiKey,
+                email: email
             })
             if(!u.timer) {
                 u.startStreamingAuctionData()
@@ -92,10 +98,15 @@ if(characterNameSelect) {
             SELECTED_FILE = file
             if(serverSelect) {
                 var res = CHARACTER_REG.exec(file)
+                if(res[1]) {
+                    character = res[1].trim()
+                }
                 if(res[2] && res[2].toLowerCase().indexOf("pvp") > -1) {
                     serverSelect.selectedIndex = 1
+                    server = "red"
                 } else {
                     serverSelect.selectedIndex = 0
+                    server = "blue"
                 }
             }
         }
@@ -117,6 +128,12 @@ if(filePathSelect) {
                 var res = CHARACTER_REG.exec(parts[parts.length-1])
                 if(res && res.length > 0) {
                     SELECTED_FILE = res[0] // this is the full match, not the repeating group that contains char name
+                    character = res[1]
+                    if(SELECTED_FILE.toLowerCase().indexOf("pvp") > -1) {
+                        server = "red"
+                    } else {
+                        server = "blue"
+                    }
                 }
 
                 // Strip this from the file dir output to the UI

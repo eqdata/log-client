@@ -4,10 +4,16 @@ const conf = require('./config')
 const storage = require('electron-json-storage')
 const helpers = require('./helpers')
 
+const streamFromPast = true
+
 const statusWidget = document.querySelector("#status")
 var statusLines = [{ time: new Date(), text: "Waiting for a new connection..."}]
 
 var Uploader = function() {
+    this.characterName = ""
+    this.serverName = ""
+    this.apiKey = ""
+    this.email = ""
     this.filePath = null
     this.timer = null
     this.seekFrom = 0
@@ -18,6 +24,10 @@ Uploader.prototype.init = function(config) {
     this.filePath = config.filePath || null
     this.batchSize = config.batchSize || this.batchSize
     this.seekFrom = 0
+    this.characterName = config.characterName || ""
+    this.serverName = config.serverName || ""
+    this.apiKey = config.apiKey || ""
+    this.email = config.email || ""
 };
 
 Uploader.prototype.authorise = function(cb) {
@@ -89,20 +99,57 @@ Uploader.prototype.upload = function() {
             auctionLines = 0
 
             //console.log("Sending payload to server it is: " + (JSON.stringify(lineBuffer).length * 8) + "bytes")
-            this.transmit(lineBuffer)
-
-            if(seekAt >= this.seekFrom) {
-                console.log("Seek from has been set to: ", seekAt)
-                this.seekFrom = seekAt
-            }
+            this.transmit(lineBuffer, function(err, message) {
+                if(!err) {
+                    if(seekAt >= this.seekFrom) {
+                        console.log("Seek from has been set to: ", seekAt)
+                        this.seekFrom = seekAt
+                    }
+                }
+                updateStatusWidget(0, message)
+            }.bind(this))
         }.bind(this))
     } catch(e) {
         throw new Error(e)
     }
 };
 
-Uploader.prototype.transmit = function(buffer) {
+Uploader.prototype.transmit = function(buffer, cb) {
+    if(buffer.length === 0) {
+        cb(true, "There were no lines to transmit in the buffer.")
+    }
+    var data = {
+        "zone" : "East Commonlands",
+        "lines" : buffer
+    }
 
+    try {
+        const collectionURL = conf.SERVICE_COLLECTION_HOST + ":" + conf.SERVICE_COLLECTION_PORT + "/channels/auction"
+        console.log(collectionURL)
+        request({
+            method: 'POST',
+            uri: "http://" + collectionURL,
+            headers: {
+                'apiKey' : this.apiKey,
+                'email' : this.email,
+                'serverName' : this.serverName,
+                'characterName' : this.characterName,
+                'Content-Type' : 'application/x-www-form-urlencoded'
+            },
+            body: JSON.stringify(data)
+        }, function(err, res, body) {
+            if(!res) {
+                cb(true, "[500] The collection service was unreachable")
+            } else if(res.statusCode === 200) {
+                cb(false, "Upload successful")
+            } else {
+                cb(true, ("[" + res.statusCode + "] " + body))
+            }
+        }.bind(this))
+    } catch(e) {
+        cb(true, "Developer error: " + e)
+        throw e
+    }
 };
 
 // On red server, auction chat is done via the OOC channel.
@@ -149,10 +196,21 @@ Uploader.prototype.stopStreamingAuctionData = function() {
 }
 
 Uploader.prototype.isAuctionLine = function(line) {
-    return line.match(/^\[[A-Za-z0-9: ]+] [A-Za-z]+ auctions?, '.+'$/img)
+    // Extract the timestamp
+    var reg = /\[([A-Za-z0-9: ]+)] [A-Za-z]+ auctions?, '.+'/img
+    var res = reg.exec(line)
+    if(res && res.length > 0) {
+        var timestamp = new Date(res[1]);
+        var now = new Date();
+        var maxDuration = 60 * 1000 * 5 // 5 minutes
+        var diff = now.getTime() - timestamp.getTime()
+        if(maxDuration >= diff || streamFromPast) {
+            return line.match(/^\[[A-Za-z0-9: ]+] [A-Za-z]+ auctions?, '.+'$/img)
+        }
+    }
 }
 
-function updateStatusWidget(auctionLines) {
+function updateStatusWidget(auctionLines, customMessage) {
     if(statusWidget) {
         var message = { time: new Date(), text: "" }
         if(auctionLines === 0) {
@@ -161,6 +219,10 @@ function updateStatusWidget(auctionLines) {
             var lineType = "line"
             if(auctionLines > 1) lineType = "lines"
             message.text = " Sent " + auctionLines + " auction " + lineType + " to the server for parsing."
+        }
+
+        if(customMessage) {
+            message.text = customMessage
         }
 
         // Check how many messages are in the buffer
