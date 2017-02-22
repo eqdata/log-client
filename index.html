@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>P99 Auction Client</title>
+    <link rel="stylesheet" href="./main.css" type="text/css">
+  </head>
+  <body>
+    <div id="overlay"></div>
+    <div id="container">
+      <nav>
+        <ul>
+          <li>Logged in as: <span id="user-email"></span>  |  </li>
+          <li><a id="logout" href="#">Log out</a></li>
+        </ul>
+      </nav>
+      <div id="controls">
+        <div id="control-wrapper">
+          <label for="file-select" id="label-file-select">Select log directory:</label>
+          <input id="file-select" type="file" placeholder="file path">
+          <input id="file-input" type="text" disabled placeholder="File path">
+          <select id="character-select" name="character-select">
+            <option>Select character --</option>
+          </select>
+          <select name="server" id="server-select" hidden>
+            <option value="Blue">Blue</option>
+            <option value="Red">Red</option>
+          </select>
+          <div id="upload">Begin Streaming Logs</div>
+          <div id="status">
+            <span class="status-text" style="opacity: 1.0">Waiting for a connection...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    // You can also require other files to run in this process
+    require('./renderer.js')
+    require('./logger.js')
+
+  </script>
+</html>

@@ -1,0 +1,138 @@
+@import url('./node_modules/font-awesome/css/font-awesome.min.css');
+
+body {
+    background-image: url('./background.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, SansSerif;
+    overflow: hidden;
+}
+
+.status-text {
+    display: block;
+    color: white;
+    font-style: italic;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+#overlay {
+    background: rgba(9, 8, 8, 0.8);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    z-index: 1;
+}
+
+nav {
+    position: fixed;
+    top: 0;
+    z-index: 10;
+    background: #151b2d;
+    border-bottom: 1px solid #21304d;
+    color: white;
+}
+
+nav ul {
+    list-style: none;
+    float: right;
+    padding-right: 15px;
+}
+
+li {
+    display: inline-block;
+}
+
+#container {
+    position: relative;
+    height: 100vh;
+    z-index: 2;
+}
+
+#controls {
+    max-width: 750px;
+    width: 100%;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#control-wrapper {
+    width: 100%;
+    max-width: 500px;
+}
+
+#file-input {
+    margin-left: -10px;
+    position: relative;
+    padding: 11px;
+    width: 57%;
+}
+
+#character-select {
+    margin-top: 12px;
+    width: 250px;
+    margin-bottom: 20px;
+}
+
+#status {
+    position: absolute;
+    bottom: 30px;
+    width: 500px;
+}
+
+#api-key, #email {
+    width: 95%;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+#upload, #login-button {
+    background: #2788c1;
+    text-align: center;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 2px;
+}
+
+.streaming {
+    background: #51c14b !important;
+}
+
+#logout {
+    color: #2788c1;
+}
+
+#label-file-select {
+    cursor: pointer;
+    color: white;
+    background: #2788c1;
+    border-radius: 2px;
+    padding: 11px 20px;
+    font-family: Arial;
+    top: 1px;
+    position: relative;
+}
+
+#file-select {
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+}
+
+#character-select {
+    width: 200px;
+    display: block;
+}
+
+nav {
+    width: 100%;
+    height: 50px;
+    font-size: 14px;
+}
