@@ -64,7 +64,7 @@ if(uploadButton) {
     uploadButton.onclick = function(e) {
         if(UPLOAD_DIR.trim() !== "" && SELECTED_FILE.trim() !== "") {
             u.init({
-                batchSize: 40,
+                batchSize: 25,
                 filePath: UPLOAD_DIR + SELECTED_FILE,
                 serverName: server,
                 characterName: character,
