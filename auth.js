@@ -4,6 +4,10 @@ const conf = require('./config')
 const path = require('path')
 const url = require('url')
 const { remote } = require('electron')
+const helpers = require('./helpers')
+
+const statusWidget = document.querySelector("#status")
+var statusLines = [{ time: new Date(), text: "Waiting for a new connection..."}]
 
 const apiKeyField = document.querySelector("#api-key")
 const emailField = document.querySelector("#email")
@@ -88,6 +92,7 @@ function authWithGatekeeper(API_KEY, EMAIL, cb) {
             }
         }, function(err, res, body) {
             console.log(res)
+            updateStatusWidget(0, body)
             if(res.statusCode === 200) {
                 cb(null, body)
             } else {
@@ -101,4 +106,38 @@ function authWithGatekeeper(API_KEY, EMAIL, cb) {
 
 function isString(str) {
     return Object.prototype.toString.call(str) === '[object String]'
+}
+
+function updateStatusWidget(auctionLines, customMessage) {
+    if(statusWidget) {
+        var message = { time: new Date(), text: "" }
+        if(auctionLines === 0) {
+            message.text = "No more auction lines to send to the server at this time.  We will keep scanning for new lines, don't worry!"
+        } else {
+            var lineType = "line"
+            if(auctionLines > 1) lineType = "lines"
+            message.text = " Sent " + auctionLines + " auction " + lineType + " to the server for parsing."
+        }
+
+        if(customMessage) {
+            message.text = customMessage
+        }
+
+        // Check how many messages are in the buffer
+        if(statusLines.length < 2) {
+            statusLines.push(message)
+        } else {
+            statusLines.shift()
+            statusLines.push(message)
+        }
+
+        statusWidget.innerHTML = ""
+        statusLines.forEach(function(line, i) {
+            let item = document.createElement("span")
+            item.style = "opacity: 0." + (6 + i)
+            item.className = "status-text"
+            item.innerHTML = "<span style='color: #2788c1'>" + helpers.prettyDate(line.time) + "</span> " + line.text
+            statusWidget.appendChild(item)
+        })
+    }
 }

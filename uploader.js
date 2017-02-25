@@ -116,7 +116,7 @@ Uploader.prototype.upload = function() {
 
 Uploader.prototype.transmit = function(buffer, cb) {
     if(buffer.length === 0) {
-        cb(true, "There were no lines to transmit in the buffer.")
+        return cb(true, "There were no lines to transmit in the buffer.")
     }
     var data = {
         "zone" : "East Commonlands",
@@ -204,7 +204,7 @@ Uploader.prototype.isAuctionLine = function(line) {
         var now = new Date();
         var maxDuration = 60 * 1000 * 5 // 5 minutes
         var diff = now.getTime() - timestamp.getTime()
-        if(maxDuration >= diff || streamFromPast) {
+        if(maxDuration >= diff) {
             return line.match(/^\[[A-Za-z0-9: ]+] [A-Za-z]+ auctions?, '.+'$/img)
         }
     }

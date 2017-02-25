@@ -21,6 +21,9 @@
     "electron-reload": "^1.1.0"
   },
   "dependencies": {
-    "electron-json-storage": "^3.0.1"
+    "electron-json-storage": "^3.0.1",
+    "font-awesome": "^4.7.0",
+    "fs": "0.0.1-security",
+    "request": "^2.79.0"
   }
 }
