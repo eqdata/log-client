@@ -122,6 +122,9 @@ if(filePathSelect) {
         if(filePathInput) {
             var path = filePathSelect.files[0].path
             var parts = path.split("/", -1)
+			if(path.indexOf("\\") > -1) {
+				parts = path.split("\\", -1)
+			}
             // The last part of the path is a file not a folder, lets set defaults and strip it
             if(parts[parts.length-1].indexOf(".") > -1) {
                 // this could be a character name, lets set it as default
@@ -139,7 +142,11 @@ if(filePathSelect) {
                 // Strip this from the file dir output to the UI
                 parts[parts.length-1] = ""
             }
-            path = "/";
+			if(!(/^win/.test(process.platform))){
+            	path = "/";
+			}else{
+				path = "";
+			}
             parts.forEach(function(part) {
                 if(part.length > 0) {
                     path += part + "/"
