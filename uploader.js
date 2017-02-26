@@ -1,4 +1,6 @@
 const fs = require('fs')
+const readline = require('readline')
+const stream = require('stream')
 const request = require('request')
 const conf = require('./config')
 const storage = require('electron-json-storage')
@@ -70,11 +72,11 @@ Uploader.prototype.upload = function() {
         var seekAt = 1
         var lineBuffer = []
 
-        var lineReader = require('readline').createInterface({
-            input: require('fs').createReadStream(this.filePath)
-        });
+        var is = fs.createReadStream(this.filePath)
+        var os = new stream
+        var rl = readline.createInterface(is, os)
 
-        lineReader.on('line', function(buffer) {
+        rl.on('line', function(buffer) {
             var line = buffer.toString()
             if(seekAt > this.seekFrom && lineBuffer.length < this.batchSize) {
                 line = this.oocLineToAuctionLine(line)
@@ -85,16 +87,16 @@ Uploader.prototype.upload = function() {
                 linesRead++
                 seekAt++
             } else if(lineBuffer.length >= this.batchSize) {
-                lineReader.close()
+                rl.close()
                 //console.log("Sending buffer: ", lineBuffer)
             } else {
                 seekAt++
             }
         }.bind(this))
 
-        lineReader.on('close', function() {
+        rl.on('close', function() {
             updateStatusWidget(auctionLines)
-            console.log("Read: " + linesRead + " lines, there were " + auctionLines + " auctions lines to be sent to the server.")
+            //console.log("Read: " + linesRead + " lines, there were " + auctionLines + " auctions lines to be sent to the server.")
             linesRead = 0
             auctionLines = 0
 
@@ -208,6 +210,7 @@ Uploader.prototype.isAuctionLine = function(line) {
             return line.match(/^\[[A-Za-z0-9: ]+] [A-Za-z]+ auctions?, '.+'$/img)
         }
     }
+    return false
 }
 
 function updateStatusWidget(auctionLines, customMessage) {
